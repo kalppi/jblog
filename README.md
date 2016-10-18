@@ -10,7 +10,7 @@ npm install pg github:kalppi/jblog
 
 Somehow run `create-db.sql`
 
-## Usage
+## Example
 
 ```
 var pg = require('pg');
