@@ -1,0 +1,15 @@
+{
+  "name": "jblog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jarno Luukkonen",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^6.1.0",
+    "promise": "^7.1.1"
+  }
+}
