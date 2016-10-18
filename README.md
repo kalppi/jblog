@@ -8,7 +8,7 @@ Simple nodejs+postgresql blogging engine
 npm install pg github:kalppi/jblog
 ```
 
-Somehow run create-db.sql
+Somehow run `create-db.sql`
 
 ## Usage
 
