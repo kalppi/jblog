@@ -1,9 +1,9 @@
 'use strict';
 
 const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
- 
-chai.use(chaiAsPromised);
+
+chai.use(require('chai-things'));
+chai.use(require("chai-as-promised"));
 chai.should();
 
 const pg = require('pg');
@@ -28,17 +28,23 @@ describe('lublu', function() {
 	});
 
 	describe('Post', function() {
-		it('#insert()', function() {
+		it('#insert()', function(done) {
 			let post = client.Post({
 				title: 'title',
 				content: 'content'
 			});
 
-			return post.save();
+			post.save().then(() => {
+				done();
+			});
 		});
 
 		it('#find()', function() {
-			return client.Post().find(1);
+			return client.Post().find(1).should.eventually.to.exist;
+		});
+
+		it('#find() with tags', function() {
+			return client.Post().find(1, {tags: true}).should.to.eventually.have.deep.property('data.tags');
 		});
 
 		it('#addTags() new post', function() {
@@ -65,17 +71,13 @@ describe('lublu', function() {
 		});
 
 		it('#count()', function() {
-			return client.Post().count().then((val) => {
-				val.should.be.equal(2);
-			});
+			return client.Post().count().should.eventually.to.be.equal(2);
 		});
 
 
 		it('#clear()', () => {
 			return client.Post().clear().then(() => {
-				return client.Post().count().then((val) => {
-					val.should.be.equal(0);
-				});
+				return client.Post().count().should.eventually.to.be.equal(0);
 			});
 		});
 
@@ -104,6 +106,18 @@ describe('lublu', function() {
 			return client.Post().findAll({offset: 2, limit: 2}).should.eventually.to.have.length(1);
 		});
 
+		it('#findAll() with tags', function() {
+			return client.Post().findAll({tags: true})
+				.should.eventually.to.have.length(3)
+				.and.should.eventually.to.all.have.deep.property('data.tags');
+		});
+
+		it('#findAll() with tags, limit and offset', function() {
+			return client.Post().findAll({tags: true, offset: 2, limit: 2})
+				.should.eventually.to.have.length(1)
+				.and.should.eventually.to.all.have.deep.property('data.tags');
+		});
+
 		it('#publish()', function() {
 			return client.Post().find(4).then((post) => {
 				return post.publish().then(() => {
@@ -126,10 +140,21 @@ describe('lublu', function() {
 			return client.Post().count().then(count => {
 				return client.Post().findRandom().then((post) => {
 					return post.delete().then(() => {
-						return client.Post().count().then(count2 => {
-							count2.should.be.equal(count - 1);
-						})
+						return client.Post().count().should.eventually.to.be.equal(count - 1);
 					});
+				});
+			});
+		});
+	});
+
+	describe('Tag', function() {
+		it('Only allow unique', function() {
+			let tag1 = client.Tag('tag');
+			let tag2 = client.Tag('TAG');
+
+			return client.Tag().clear().then(() => {
+				return client.save([tag1, tag2]).then(() => {
+					return client.Tag().count().should.eventually.be.equal(1);
 				});
 			});
 		});

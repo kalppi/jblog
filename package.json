@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cat create-db.sql | psql -d lublu > /dev/null && TEST=1 ./node_modules/mocha/bin/mocha"
+    "test": "cat sql/drop-db.sql | psql -d lublu > /dev/null 2>&1 && cat sql/create-db.sql | psql -d lublu > /dev/null 2>&1 && TEST=1 ./node_modules/mocha/bin/mocha && cat sql/drop-db.sql | psql -d lublu > /dev/null",
+    "create-db": "cat sql/create-db.sql | psql -d lublu",
+    "drop-db": "cat sql/drop-db.sql | psql -d lublu"
   },
   "author": "Jarno Luukkonen",
   "license": "MIT",
@@ -15,6 +17,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "chai-things": "^0.2.0",
     "mocha": "^3.2.0",
     "pg": "^6.1.5"
   }

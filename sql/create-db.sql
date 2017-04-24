@@ -1,19 +1,15 @@
-DROP TABLE IF EXISTS lublu_tag_join;
-DROP TABLE IF EXISTS lublu_tag;
-DROP TABLE IF EXISTS lublu_post;
-
 CREATE TABLE lublu_post (
 	id SERIAL PRIMARY KEY,
 	title VARCHAR(255),
 	content TEXT,
+	is_published BOOLEAN DEFAUlT FALSE,
 	date_published TIMESTAMPTZ DEFAULT NULL,
-	date_updated TIMESTAMPTZ,
-	is_published BOOLEAN DEFAUlT FALSE
+	date_updated TIMESTAMPTZ
 );
 
 CREATE TABLE lublu_tag (
 	id SERIAL PRIMARY KEY,
-	tag VARCHAR(100) UNIQUE
+	tag CITEXT UNIQUE
 );
 
 CREATE TABLE lublu_tag_join (

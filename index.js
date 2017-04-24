@@ -15,6 +15,7 @@ const lublu = {
 };
 
 require('./lib/dataobject.js')(lublu);
+require('./lib/tag.js')(lublu);
 require('./lib/post.js')(lublu);
 require('./lib/connection.js')(lublu);
 
@@ -25,6 +26,10 @@ module.exports = class {
 
 	Post(data) {
 		return new lublu.Post(this.db, data);
+	}
+
+	Tag(tag) {
+		return new lublu.Tag(this.db, {tag: tag});
 	}
 
 	clear() {
