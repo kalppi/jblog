@@ -1,14 +1,26 @@
 "use strict";
 
-var util = require('util');
+const DEBUG = process.env.NODE_ENV !== 'production' && !process.env.TEST;
 
-const DEBUG = process.env.NODE_ENV != 'production' && !process.env.TEST;
+const lublu = {
+	log: function(s) {
+		if(DEBUG) {
+			console.log(s);
+		}
+	},
 
+	table: function (name) {
+		return 'lublu_' + name.toLowerCase();
+	}
+};
 
+require('./lib/dataobject.js')(lublu);
+require('./lib/post.js')(lublu);
+require('./lib/connection.js')(lublu);
 
-class Instance {
+module.exports = class {
 	constructor(db) {
-		this.db = db;
+		this.db = new lublu.Connection(db);
 	}
 
 	Post(data) {
@@ -41,31 +53,3 @@ class Instance {
 		});
 	}
 }
-
-const lublu = {
-	log: function(s) {
-		if(DEBUG) {
-			console.log(s);
-		}
-	},
-
-	table: function (name) {
-		return 'lublu_' + name.toLowerCase();
-	}
-};
-
-require('./lib/dataobject.js')(lublu);
-require('./lib/post.js')(lublu);
-require('./lib/connection.js')(lublu);
-
-module.exports = class {
-	constructor(pool) {
-		this.con = new lublu.Connection(pool);
-	}
-
-	connect() {
-		return new Promise((resolve, reject) => {
-			resolve(new Instance(this.con));
-		});
-	}
-};

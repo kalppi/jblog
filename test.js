@@ -21,51 +21,57 @@ const pool = new pg.Pool({
 describe('lublu', function() {
 	const blog = new lublu(pool);
 
-	let client = null;
+	let client = blog;
 
 	before((done) => {
-		blog.connect().then((c) => {
-			client = c;
-
-			done();
-		});
+		done();
 	});
 
 	describe('Post', function() {
-		it('insert', function() {
+		it('#insert()', function() {
 			let post = client.Post({
 				title: 'title',
-				content: 'content',
-				is_published: true
+				content: 'content'
 			});
 
 			return post.save();
 		});
 
-		it('find', function() {
+		it('#find()', function() {
 			return client.Post().find(1);
 		});
 
-		it('addTags', function() {
-			return client.Post().find(1).then((post) => {
+		it('#addTags() new post', function() {
+			let post = client.Post({
+				title: 'title',
+				content: 'content'
+			});
+
+			return post.addTags(['stuff']).then(() => {
+				return post.save();
+			});
+		});
+
+		it('#addTags() existing post', function() {
+			return client.Post().find(2).then((post) => {
 				return post.addTags(['linux', 'test']);
 			});
 		});
 
-		it('getTags', function() {
-			return client.Post().find(1).then((post) => {
+		it('#getTags()', function() {
+			return client.Post().find(2).then((post) => {
 				return post.getTags().should.eventually.to.have.members(['test','linux']);
 			});
 		});
 
-		it('count', function() {
+		it('#count()', function() {
 			return client.Post().count().then((val) => {
-				val.should.be.equal(1);
+				val.should.be.equal(2);
 			});
 		});
 
 
-		it('clear', () => {
+		it('#clear()', () => {
 			return client.Post().clear().then(() => {
 				return client.Post().count().then((val) => {
 					val.should.be.equal(0);
@@ -73,7 +79,7 @@ describe('lublu', function() {
 			});
 		});
 
-		it('findAll', function() {
+		it('#findAll()', function() {
 			let post1 = client.Post({
 				title: 'title',
 				content: 'content'
@@ -84,8 +90,47 @@ describe('lublu', function() {
 				content: 'content'
 			});
 
-			return client.save([post1, post2]).then(() => {
-				return client.Post().findAll(1).should.eventually.to.have.length(2);
+			let post3 = client.Post({
+				title: 'title',
+				content: 'content'
+			});
+
+			return client.save([post1, post2, post3]).then(() => {
+				return client.Post().findAll().should.eventually.to.have.length(3);
+			});
+		});
+
+		it('#findAll() with limit and offset', function() {
+			return client.Post().findAll({offset: 2, limit: 2}).should.eventually.to.have.length(1);
+		});
+
+		it('#publish()', function() {
+			return client.Post().find(4).then((post) => {
+				return post.publish().then(() => {
+					post.get('is_published').should.be.equal(true);
+					chai.expect(post.get('date_published')).to.not.be.null;
+				});
+			});
+		});
+
+		it('#unpublish()', function() {
+			return client.Post().find(4).then((post) => {
+				return post.unpublish().then(() => {
+					post.get('is_published').should.be.equal(false);
+					chai.expect(post.get('date_published')).to.be.null;
+				});
+			});
+		});
+
+		it('#delete()', function() {
+			return client.Post().count().then(count => {
+				return client.Post().findRandom().then((post) => {
+					return post.delete().then(() => {
+						return client.Post().count().then(count2 => {
+							count2.should.be.equal(count - 1);
+						})
+					});
+				});
 			});
 		});
 	});
