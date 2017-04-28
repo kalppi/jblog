@@ -17,6 +17,7 @@ const lublu = {
 require('./lib/dataobject.js')(lublu);
 require('./lib/tag.js')(lublu);
 require('./lib/post.js')(lublu);
+require('./lib/page.js')(lublu);
 require('./lib/connection.js')(lublu);
 
 module.exports = class {
@@ -26,6 +27,10 @@ module.exports = class {
 
 	Post(data) {
 		return new lublu.Post(this.db, data);
+	}
+
+	Page(postsInPage, searchOptions) {
+		return new lublu.Page(this.db, postsInPage, searchOptions)
 	}
 
 	Tag(tag) {
@@ -50,11 +55,7 @@ module.exports = class {
 				promises.push(o.save());
 			}
 
-			Promise.all(promises).then(values => {
-				resolve(values);
-			}).catch(err => {
-				reject(err);
-			});
+			Promise.all(promises).then(resolve).catch(reject);
 		});
 	}
 }
