@@ -20,7 +20,6 @@ require('./lib/dao/psql/psql.dao.tag')(lublu);
 require('./lib/connection')(lublu);
 require('./lib/post')(lublu);
 require('./lib/tag')(lublu);
-require('./lib/posttag')(lublu);
 require('./lib/page')(lublu);
 
 module.exports = class {
