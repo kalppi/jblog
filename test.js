@@ -172,23 +172,26 @@ describe('lublu', function() {
 		it('#delete() multiple', function(done) {
 			blog.posts.count().then(count => {
 				let findPosts = new Promise((resolve, reject) => {
-					const findRandom = (count, posts, ids) => {
+					const findRandom = (count, posts) => {
 						blog.posts.findRandom().then((post) => {
-							if(ids.indexOf(post.get('id')) == -1) {
-								ids.push(post.get('id'));
+							const found = posts.find((p) => {
+								return p.get('id') == post.get('id')
+							});
+
+							if(!found) {
 								posts.push(post);
 								count--;
 							}
 
 							if(count > 0) {
-								findRandom(count, posts, ids);
+								findRandom(count, posts);
 							} else {
 								resolve(posts);
 							}
 						});
 					}
 
-					findRandom(3, [], []);
+					findRandom(3, []);
 				});
 
 				blog.posts.count().then(count => {
