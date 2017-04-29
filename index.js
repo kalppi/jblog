@@ -16,11 +16,13 @@ const lublu = {
 
 require('./lib/dao/psql/psql.dao.post')(lublu);
 require('./lib/dao/psql/psql.dao.tag')(lublu);
+require('./lib/dao/psql/psql.dao.user')(lublu);
 
 require('./lib/connection')(lublu);
 require('./lib/post')(lublu);
 require('./lib/tag')(lublu);
 require('./lib/page')(lublu);
+require('./lib/user')(lublu);
 
 module.exports = class {
 	constructor(db) {
@@ -28,6 +30,7 @@ module.exports = class {
 
 		this.postDAO = new lublu.PsqlPostDAO(this.db);
 		this.tagDAO = new lublu.PsqlTagDAO(this.db);
+		this.userDAO = new lublu.PsqlUserDAO(this.db);
 	}
 
 	get posts() {
@@ -36,6 +39,22 @@ module.exports = class {
 
 	get tags() {
 		return this.tagDAO;
+	}
+
+	get users() {
+		return this.userDAO;
+	}
+
+	User(data) {
+		if(Array.isArray(data)) {
+			let posts = [];
+			for(let d of data) {
+				posts.push(new lublu.User(d));
+			}
+			return posts;
+		} else {
+			return new lublu.User(data);
+		}
 	}
 
 	Post(data) {

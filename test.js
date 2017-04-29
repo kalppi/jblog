@@ -16,6 +16,16 @@ describe('lublu', function() {
 
 	let startId = 0;
 
+	let user = blog.User({
+		name: 'Pera'
+	});
+
+	before(done => {
+		blog.users.save(user).then(() => {
+			done();
+		});
+	});
+
 	beforeEach((done) => {
 		let posts = blog.Post([
 			{title: 'title1',
@@ -32,6 +42,10 @@ describe('lublu', function() {
 			{title: 'title6',
 			content: 'content6'},
 		]);
+
+		for(let p of posts) {
+			p.set('user', user);
+		}
 
 		blog.posts.clear().then(() => {
 			blog.posts.save(posts).then(() => {
@@ -62,7 +76,8 @@ describe('lublu', function() {
 			let post = blog.Post({
 				title: 'title',
 				content: 'aaaaa',
-				tags: ['stuff', 'asd']
+				tags: ['stuff', 'asd'],
+				user: user
 			});
 
 			return blog.posts.save(post).then(post => {
@@ -74,7 +89,8 @@ describe('lublu', function() {
 		it('#save() old with tags', function() {
 			let post = blog.Post({
 				title: 'title',
-				content: 'aaaaa'
+				content: 'aaaaa',
+				user: user
 			});
 
 			return blog.posts.save(post).then(post => {
@@ -93,7 +109,8 @@ describe('lublu', function() {
 			let post = blog.Post({
 				title: 'title',
 				content: 'bbb',
-				tags: ['xxx', 'yyy']
+				tags: ['xxx', 'yyy'],
+				user: user
 			});
 
 			return blog.posts.save(post).then(post => {

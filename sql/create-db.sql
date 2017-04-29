@@ -1,15 +1,21 @@
+CREATE TABLE lublu_user (
+	id SERIAL PRIMARY KEY,
+	name CITEXT UNIQUE NOT NULL
+);
+
 CREATE TABLE lublu_post (
 	id SERIAL PRIMARY KEY,
-	title VARCHAR(255),
-	content TEXT,
-	is_published BOOLEAN DEFAUlT FALSE,
+	user_id INTEGER NOT NULL REFERENCES lublu_user(id) ON DELETE CASCADE,
+	title VARCHAR(255) NOT NULL,
+	content TEXT NOT NULL,
+	is_published BOOLEAN NOT NULL DEFAUlT FALSE,
 	date_published TIMESTAMPTZ DEFAULT NULL,
-	date_updated TIMESTAMPTZ
+	date_updated TIMESTAMPTZ DEFAULT NULL
 );
 
 CREATE TABLE lublu_tag (
 	id SERIAL PRIMARY KEY,
-	tag CITEXT UNIQUE
+	tag CITEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE lublu_tag_join (
