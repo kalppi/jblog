@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const DEBUG = process.env.NODE_ENV !== 'production' && !process.env.TEST;
 
@@ -11,51 +11,51 @@ const lublu = {
 
 	table: function (name) {
 		return 'lublu_' + name.toLowerCase();
+	},
+
+	parseSqlArray(data) {
+		return data.substring(1, data.length - 1).split(',');
 	}
 };
 
-require('./lib/dataobject.js')(lublu);
-require('./lib/tag.js')(lublu);
-require('./lib/post.js')(lublu);
-require('./lib/page.js')(lublu);
-require('./lib/connection.js')(lublu);
+require('./lib/dao/psql/psql.dao.post')(lublu);
+require('./lib/dao/psql/psql.dao.tag')(lublu);
+
+require('./lib/connection')(lublu);
+require('./lib/post')(lublu);
+require('./lib/tag')(lublu);
+require('./lib/posttag')(lublu);
+require('./lib/page')(lublu);
 
 module.exports = class {
 	constructor(db) {
 		this.db = new lublu.Connection(db);
+
+		this.postDAO = new lublu.PsqlPostDAO(this.db);
+		this.tagDAO = new lublu.PsqlTagDAO(this.db);
+	}
+
+	get posts() {
+		return this.postDAO;
+	}
+
+	get tags() {
+		return this.tagDAO;
 	}
 
 	Post(data) {
-		return new lublu.Post(this.db, data);
+		return new lublu.Post(data);
 	}
 
-	Page(postsInPage, searchOptions) {
-		return new lublu.Page(this.db, postsInPage, searchOptions)
+	Tag(data) {
+		return new lublu.Tag(data);
 	}
 
-	Tag(tag) {
-		return new lublu.Tag(this.db, {tag: tag});
+	Page(dao, options) {
+		return new lublu.Page(dao, options);
 	}
 
-	clear() {
-		return new Promise((resolve, reject) => {
-			new Post(this.db).clear().then(() => {
-				resolve();
-			}).catch(err => {
-				reject(err);
-			});
-		});
-	}
-
-	save(objects) {
-		return new Promise((resolve, reject) => {
-			let promises = [];
-
-			for(let o of objects) {
-				promises.push(o.save());
-			}
-
-			Promise.all(promises).then(resolve).catch(reject);
-		});
+	ui(app) {
+		return require('./ui/ui.js')(app);
 	}
 }

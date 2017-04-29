@@ -14,8 +14,8 @@ CREATE TABLE lublu_tag (
 
 CREATE TABLE lublu_tag_join (
 	id SERIAL PRIMARY KEY,
-	post_id INTEGER REFERENCES lublu_post(id) ON DELETE CASCADE,
-	tag_id INTEGER REFERENCES lublu_tag(id) ON DELETE RESTRICT,
+	post_id INTEGER NOT NULL REFERENCES lublu_post(id) ON DELETE CASCADE,
+	tag_id INTEGER NOT NULL REFERENCES lublu_tag(id) ON DELETE CASCADE,
 	UNIQUE(post_id, tag_id)
 );
 
