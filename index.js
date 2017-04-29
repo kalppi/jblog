@@ -11,10 +11,6 @@ const lublu = {
 
 	table: function (name) {
 		return 'lublu_' + name.toLowerCase();
-	},
-
-	parseSqlArray(data) {
-		return data.substring(1, data.length - 1).split(',');
 	}
 };
 
@@ -44,7 +40,15 @@ module.exports = class {
 	}
 
 	Post(data) {
-		return new lublu.Post(data);
+		if(Array.isArray(data)) {
+			let posts = [];
+			for(let d of data) {
+				posts.push(new lublu.Post(d));
+			}
+			return posts;
+		} else {
+			return new lublu.Post(data);
+		}
 	}
 
 	Tag(data) {

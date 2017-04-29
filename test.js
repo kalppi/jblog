@@ -17,40 +17,25 @@ describe('lublu', function() {
 	let startId = 0;
 
 	beforeEach((done) => {
-		let post1 = blog.Post({
-			title: 'title1',
+		let posts = blog.Post([
+			{title: 'title1',
 			content: 'content1',
-			tags: ['test']
-		});
-
-		let post2 = blog.Post({
-			title: 'title2',
-			content: 'content2'
-		});
-
-		let post3 = blog.Post({
-			title: 'title3',
-			content: 'content3'
-		});
-
-		let post4 = blog.Post({
-			title: 'title4',
-			content: 'content4'
-		});
-
-		let post5 = blog.Post({
-			title: 'title5',
-			content: 'content5'
-		});
-
-		let post6 = blog.Post({
-			title: 'title6',
-			content: 'content6'
-		});
+			tags: ['test']},
+			{title: 'title2',
+			content: 'content2'},
+			{title: 'title3',
+			content: 'content3'},
+			{title: 'title4',
+			content: 'content4'},
+			{title: 'title5',
+			content: 'content5'},
+			{title: 'title6',
+			content: 'content6'},
+		]);
 
 		blog.posts.clear().then(() => {
-			blog.posts.save([post1, post2, post3, post4, post5, post6]).then(() => {
-				startId = post1.get('id');
+			blog.posts.save(posts).then(() => {
+				startId = posts[0].get('id');
 
 				done();
 			}).catch(err => {
