@@ -61,16 +61,16 @@ describe('lublu', function() {
 
 	describe('Post', function() {
 		it('#find()', function() {
-			return blog.posts.find(1).should.eventually.to.exist;
+			return blog.posts.find(1).should.eventually.exist;
 		});
 
 		it('#find() with tags', function() {
 			return blog.posts.find(startId, {tags: true})
-				.should.eventually.have.deep.property('data.tags').to.deep.equal(['test']);
+				.should.eventually.have.deep.property('data.tags').deep.equal(['test']);
 		});
 
 		it('#findRandom()', function() {
-			return blog.posts.findRandom().should.eventually.to.exist;
+			return blog.posts.findRandom().should.eventually.exist;
 		});
 
 		it('#save() new with tags', function() {
@@ -82,7 +82,7 @@ describe('lublu', function() {
 
 			return blog.posts.save(post).then(post => {
 				return blog.posts.find(post.get('id'), {tags: true})
-					.should.eventually.have.deep.property('data.tags').to.have.length(2);
+					.should.eventually.have.deep.property('data.tags').have.length(2);
 			});
 		});
 
@@ -98,7 +98,7 @@ describe('lublu', function() {
 
 					return blog.posts.save(post).then(post => {
 						return blog.posts.find(post.get('id'), {tags: true})
-							.should.eventually.have.deep.property('data.tags').to.have.length(2);
+							.should.eventually.have.deep.property('data.tags').have.length(2);
 					});
 				});
 			});
@@ -117,35 +117,35 @@ describe('lublu', function() {
 
 					return blog.posts.save(post).then(post => {
 						return blog.posts.find(post.get('id'), {tags: true})
-							.should.eventually.have.deep.property('data.tags').to.have.length(1);
+							.should.eventually.have.deep.property('data.tags').have.length(1);
 					});
 				});
 			});
 		});
 
 		it('#count()', function() {
-			return blog.posts.count().should.eventually.to.be.equal(6);
+			return blog.posts.count().should.eventually.be.equal(6);
 		});
 
 		it('#clear()', () => {
 			return blog.posts.clear().then(() => {
-				return blog.posts.count().should.eventually.to.be.equal(0);
+				return blog.posts.count().should.eventually.be.equal(0);
 			});
 		});
 
 		it('#findAll()', function() {
-			return blog.posts.findAll().should.eventually.to.have.length(6);
+			return blog.posts.findAll().should.eventually.have.length(6);
 		});
 
 		it('#findAll() with limit and offset', function() {
-			return blog.posts.findAll({offset: 5, limit: 2}).should.eventually.to.have.length(1);
+			return blog.posts.findAll({offset: 5, limit: 2}).should.eventually.have.length(1);
 		});
 
 		it('#publish()', function() {
 			return blog.posts.find(startId).then((post) => {
 				return blog.posts.publish(post).then(() => {
 					post.get('is_published').should.be.equal(true);
-					chai.expect(post.get('date_published')).to.not.be.null;
+					chai.expect(post.get('date_published')).not.be.null;
 				});
 			});
 		});
@@ -154,7 +154,7 @@ describe('lublu', function() {
 			return blog.posts.find(startId).then((post) => {
 				return blog.posts.unpublish(post).then(() => {
 					post.get('is_published').should.be.equal(false);
-					chai.expect(post.get('date_published')).to.be.null;
+					chai.expect(post.get('date_published')).be.null;
 				});
 			});
 		});
@@ -163,7 +163,7 @@ describe('lublu', function() {
 			return blog.posts.count().then(count => {
 				return blog.posts.findRandom().then((post) => {
 					return blog.posts.delete(post).then(() => {
-						return blog.posts.count().should.eventually.to.be.equal(count - 1);
+						return blog.posts.count().should.eventually.be.equal(count - 1);
 					});
 				});
 			});
@@ -208,16 +208,16 @@ describe('lublu', function() {
 
 	describe('Page', function() {
 		it('#getPageCount()', function() {
-			return blog.Page(blog.posts, {perPage: 4}).getPageCount().should.eventually.to.be.equal(2);
+			return blog.Page(blog.posts, {perPage: 4}).getPageCount().should.eventually.be.equal(2);
 		});
 
 		it('#getPage()', function() {
-			return blog.Page(blog.posts, {perPage: 4}).getPage(1).should.eventually.to.have.length(2);
+			return blog.Page(blog.posts, {perPage: 4}).getPage(1).should.eventually.have.length(2);
 		});
 
 
 		it('#getPage() outside bounds', function() {
-			return blog.Page(blog.posts, {perPage: 4}).getPage(2).should.eventually.to.have.length(0);
+			return blog.Page(blog.posts, {perPage: 4}).getPage(2).should.eventually.have.length(0);
 		});
 	});
 
