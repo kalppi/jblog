@@ -11,73 +11,41 @@ const lublu = {
 
 	table: function (name) {
 		return 'lublu_' + name.toLowerCase();
+	},
+
+	ucFirst(text) {
+    	return text.charAt(0).toUpperCase() + text.slice(1);
 	}
 };
 
-require('./lib/dao/psql/psql.dao.post')(lublu);
-require('./lib/dao/psql/psql.dao.tag')(lublu);
-require('./lib/dao/psql/psql.dao.user')(lublu);
+require('./lib/dao/daofactory')(lublu);
 
 require('./lib/connection')(lublu);
+require('./lib/blog')(lublu);
 require('./lib/post')(lublu);
 require('./lib/tag')(lublu);
 require('./lib/page')(lublu);
 require('./lib/user')(lublu);
 
-module.exports = class {
-	constructor(db) {
-		this.db = new lublu.Connection(db);
+module.exports = (db) => {
+	const daoFactory = new lublu.DaoFactory('psql', new lublu.Connection(db));
 
-		this.postDAO = new lublu.PsqlPostDAO(this.db);
-		this.tagDAO = new lublu.PsqlTagDAO(this.db);
-		this.userDAO = new lublu.PsqlUserDAO(this.db);
-	}
+	return {
+		createBlog: (name) => {
+			return new Promise((resolve, reject) => {
+				const blogDao = daoFactory.create('blog');
+				const blog = new lublu.Blog({name: name}, daoFactory);
 
-	get posts() {
-		return this.postDAO;
-	}
+				blogDao.save(blog).then(resolve).catch(reject);
+			});
+		},
 
-	get tags() {
-		return this.tagDAO;
-	}
+		findBlog: (name) => {
+			return new Promise((resolve, reject) => {
+				const blogDAO = daoFactory.create('blog');
 
-	get users() {
-		return this.userDAO;
-	}
-
-	User(data) {
-		if(Array.isArray(data)) {
-			let posts = [];
-			for(let d of data) {
-				posts.push(new lublu.User(d));
-			}
-			return posts;
-		} else {
-			return new lublu.User(data);
+				blogDAO.findByName(name, daoFactory).then(resolve).catch(reject);
+			});
 		}
 	}
-
-	Post(data) {
-		if(Array.isArray(data)) {
-			let posts = [];
-			for(let d of data) {
-				posts.push(new lublu.Post(d));
-			}
-			return posts;
-		} else {
-			return new lublu.Post(data);
-		}
-	}
-
-	Tag(data) {
-		return new lublu.Tag(data);
-	}
-
-	Page(dao, options) {
-		return new lublu.Page(dao, options);
-	}
-
-	ui(app) {
-		return require('./ui/ui.js')(app);
-	}
-}
+};

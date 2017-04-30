@@ -1,3 +1,8 @@
+CREATE TABLE lublu_blog (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(100)
+);
+
 CREATE TABLE lublu_user (
 	id SERIAL PRIMARY KEY,
 	name CITEXT UNIQUE NOT NULL
@@ -5,6 +10,7 @@ CREATE TABLE lublu_user (
 
 CREATE TABLE lublu_post (
 	id SERIAL PRIMARY KEY,
+	blog_id INTEGER REFERENCES lublu_blog(id) ON DELETE CASCADE,
 	user_id INTEGER NOT NULL REFERENCES lublu_user(id) ON DELETE CASCADE,
 	title VARCHAR(255) NOT NULL,
 	content TEXT NOT NULL,

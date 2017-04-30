@@ -7,22 +7,31 @@ chai.use(require("chai-as-promised"));
 chai.should();
 
 const pg = require('pg');
-const lublu = require('./index.js');
 	
 const pool = new pg.Pool(require('./test-db.json'));
+const lublu = require('./index.js')(pool);
 
 describe('lublu', function() {
-	const blog = new lublu(pool);
-
+	let blog = null;
 	let startId = 0;
 
-	let user = blog.User({
-		name: 'Pera'
-	});
+	let user = null;
 
 	before(done => {
-		blog.users.save(user).then(() => {
-			done();
+		lublu.createBlog('test').then(() => {
+			lublu.findBlog('test').then(b => {
+				blog = b;
+				
+				user = blog.User({
+					name: 'Pera'
+				});
+
+				blog.users.save(user).then(() => {
+					done();
+				});
+			});
+		}).catch(err => {
+			console.log(err);
 		});
 	});
 
