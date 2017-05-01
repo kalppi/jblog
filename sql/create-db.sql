@@ -10,7 +10,7 @@ CREATE TABLE lublu_user (
 
 CREATE TABLE lublu_post (
 	id SERIAL PRIMARY KEY,
-	blog_id INTEGER REFERENCES lublu_blog(id) ON DELETE CASCADE,
+	blog_id INTEGER NOT NULL REFERENCES lublu_blog(id) ON DELETE CASCADE,
 	user_id INTEGER NOT NULL REFERENCES lublu_user(id) ON DELETE CASCADE,
 	title VARCHAR(255) NOT NULL,
 	content TEXT NOT NULL,
@@ -18,6 +18,8 @@ CREATE TABLE lublu_post (
 	date_published TIMESTAMPTZ DEFAULT NULL,
 	date_updated TIMESTAMPTZ DEFAULT NULL
 );
+
+CREATE INDEX blog_id_idx ON lublu_post (blog_id);
 
 CREATE TABLE lublu_tag (
 	id SERIAL PRIMARY KEY,

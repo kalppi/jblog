@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cat sql/drop-db.sql | psql -d lublu > /dev/null 2>&1 && cat sql/create-db.sql | psql -d lublu > /dev/null 2>&1 && TEST=1 ./node_modules/mocha/bin/mocha && cat sql/drop-db.sql | psql -d lublu > /dev/null",
+    "test": "TEST=1 ./node_modules/mocha/bin/mocha",
     "create-db": "cat sql/create-db.sql | psql -d lublu",
     "drop-db": "cat sql/drop-db.sql | psql -d lublu"
   },

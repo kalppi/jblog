@@ -19,7 +19,6 @@ const lublu = {
 };
 
 require('./lib/dao/daofactory')(lublu);
-
 require('./lib/connection')(lublu);
 require('./lib/blog')(lublu);
 require('./lib/post')(lublu);
@@ -27,25 +26,61 @@ require('./lib/tag')(lublu);
 require('./lib/page')(lublu);
 require('./lib/user')(lublu);
 
-module.exports = (db) => {
-	const daoFactory = new lublu.DaoFactory('psql', new lublu.Connection(db));
 
-	return {
-		createBlog: (name) => {
-			return new Promise((resolve, reject) => {
-				const blogDao = daoFactory.create('blog');
-				const blog = new lublu.Blog({name: name}, daoFactory);
+module.exports = class {
+	constructor(db) {
+		this.daoFactory = new lublu.DaoFactory('psql', new lublu.Connection(db));
+		
+		this.blogDAO = this.daoFactory.create('blog', this.daoFactory);
+		this.userDAO = this.daoFactory.create('user');
+		this.tagDAO = this.daoFactory.create('tag');
+	}
 
-				blogDao.save(blog).then(resolve).catch(reject);
-			});
-		},
+	get blogs() {
+		return this.blogDAO;
+	}
 
-		findBlog: (name) => {
-			return new Promise((resolve, reject) => {
-				const blogDAO = daoFactory.create('blog');
+	get tags() {
+		return this.tagDAO;
+	}
 
-				blogDAO.findByName(name, daoFactory).then(resolve).catch(reject);
-			});
+	get users() {
+		return this.userDAO;
+	}
+
+	Blog(data) {
+		return new lublu.Blog(data, this.daoFactory);
+	}
+
+	Post(data) {
+		if(Array.isArray(data)) {
+			let posts = [];
+			for(let d of data) {
+				posts.push(new lublu.Post(d));
+			}
+			return posts;
+		} else {
+			return new lublu.Post(data);
 		}
 	}
-};
+
+	User(data) {
+		if(Array.isArray(data)) {
+			let posts = [];
+			for(let d of data) {
+				posts.push(new lublu.User(d));
+			}
+			return posts;
+		} else {
+			return new lublu.User(data);
+		}
+	}
+
+	Tag(data) {
+		return new lublu.Tag(data);
+	}
+
+	Page(dao, options) {
+		return new lublu.Page(dao, options);
+	}
+}

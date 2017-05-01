@@ -7,39 +7,65 @@ chai.use(require("chai-as-promised"));
 chai.should();
 
 const pg = require('pg');
-	
 const pool = new pg.Pool(require('./test-db.json'));
-const lublu = require('./index.js')(pool);
+const Lublu = require('./index.js');
+const lublu = new Lublu(pool);
 
 describe('lublu', function() {
 	let blog = null;
+	let user = null;
 	let startId = 0;
 
-	let user = null;
+	const clean = () => {
+		return new Promise((resolve, reject) => {
+			const p1 = new Promise((resolve, reject) => {
+				lublu.blogs.findByName('test-blog').then(blog => {
+					lublu.blogs.delete(blog).then(resolve);
+				}, resolve);
+			});
+
+			const p2 = new Promise((resolve, reject) => {
+				lublu.tags.findByName(['test-tag1', 'test-tag2']).then(tags => {
+					lublu.tags.delete(tags).then(resolve);
+				}, resolve);
+			});
+
+			const p3 = new Promise((resolve, reject) => {
+				lublu.users.findByName('test-user').then(user => {
+					lublu.users.delete(user).then(resolve);
+				}, resolve);
+			});
+
+			Promise.all([p1, p2, p3]).then(resolve);
+		});
+	};
 
 	before(done => {
-		lublu.createBlog('test').then(() => {
-			lublu.findBlog('test').then(b => {
-				blog = b;
-				
-				user = blog.User({
-					name: 'Pera'
+		clean().then(() => {
+			blog = lublu.Blog({name: 'test-blog'});
+			lublu.blogs.save(blog).then(() => {
+				user = lublu.User({
+					name: 'test-user'
 				});
 
-				blog.users.save(user).then(() => {
+				lublu.users.save(user).then(() => {
 					done();
 				});
 			});
-		}).catch(err => {
-			console.log(err);
+		});
+	});
+
+	after(done => {
+		clean().then(() => {
+			done();
 		});
 	});
 
 	beforeEach((done) => {
-		let posts = blog.Post([
+		let posts = lublu.Post([
 			{title: 'title1',
 			content: 'content1',
-			tags: ['test']},
+			tags: ['test-tag1']},
 			{title: 'title2',
 			content: 'content2'},
 			{title: 'title3',
@@ -69,12 +95,12 @@ describe('lublu', function() {
 
 	describe('Post', function() {
 		it('#find()', function() {
-			return blog.posts.find(1).should.eventually.exist;
+			return blog.posts.find(startId).should.eventually.exist;
 		});
 
 		it('#find() with tags', function() {
 			return blog.posts.find(startId, {tags: true})
-				.should.eventually.have.deep.property('data.tags').deep.equal(['test']);
+				.should.eventually.have.deep.property('data.tags').deep.equal(['test-tag1']);
 		});
 
 		it('#findRandom()', function() {
@@ -82,10 +108,10 @@ describe('lublu', function() {
 		});
 
 		it('#save() new with tags', function() {
-			let post = blog.Post({
+			let post = lublu.Post({
 				title: 'title',
 				content: 'aaaaa',
-				tags: ['stuff', 'asd'],
+				tags: ['test-tag1', 'test-tag2'],
 				user: user
 			});
 
@@ -96,7 +122,7 @@ describe('lublu', function() {
 		});
 
 		it('#save() old with tags', function() {
-			let post = blog.Post({
+			let post = lublu.Post({
 				title: 'title',
 				content: 'aaaaa',
 				user: user
@@ -104,7 +130,7 @@ describe('lublu', function() {
 
 			return blog.posts.save(post).then(post => {
 				return blog.posts.find(post.get('id'), {tags: true}).then(post => {
-					post.append('tags', ['aaa', 'bbb']);
+					post.append('tags', ['test-tag1', 'test-tag2']);
 
 					return blog.posts.save(post).then(post => {
 						return blog.posts.find(post.get('id'), {tags: true})
@@ -115,16 +141,16 @@ describe('lublu', function() {
 		});
 
 		it('#save() old with removed tags', function() {
-			let post = blog.Post({
+			let post = lublu.Post({
 				title: 'title',
 				content: 'bbb',
-				tags: ['xxx', 'yyy'],
+				tags: ['test-tag1', 'test-tag2'],
 				user: user
 			});
 
 			return blog.posts.save(post).then(post => {
 				return blog.posts.find(post.get('id'), {tags: true}).then(post => {
-					post.remove('tags', ['xxx', 'zzz']);
+					post.remove('tags', ['test-tag1', 'test-tag3']);
 
 					return blog.posts.save(post).then(post => {
 						return blog.posts.find(post.get('id'), {tags: true})
@@ -224,28 +250,25 @@ describe('lublu', function() {
 
 	describe('Page', function() {
 		it('#getPageCount()', function() {
-			return blog.Page(blog.posts, {perPage: 4}).getPageCount().should.eventually.be.equal(2);
+			return lublu.Page(blog.posts, {perPage: 4}).getPageCount().should.eventually.be.equal(2);
 		});
 
 		it('#getPage()', function() {
-			return blog.Page(blog.posts, {perPage: 4}).getPage(1).should.eventually.have.length(2);
+			return lublu.Page(blog.posts, {perPage: 4}).getPage(1).should.eventually.have.length(2);
 		});
 
 
 		it('#getPage() outside bounds', function() {
-			return blog.Page(blog.posts, {perPage: 4}).getPage(2).should.eventually.have.length(0);
+			return lublu.Page(blog.posts, {perPage: 4}).getPage(2).should.eventually.have.length(0);
 		});
 	});
 
 	describe('Tag', function() {
 		it('Only allow unique', function() {
-			let tag1 = blog.Tag({tag: 'tag'});
-			let tag2 = blog.Tag({tag: 'TAG'});
+			let tag = lublu.Tag({tag: 'TEST-TAG1'});
 
-			return blog.tags.clear().then(() => {
-				return blog.tags.save([tag1, tag2]).then(() => {
-					return blog.tags.count().should.eventually.be.equal(1);
-				});
+			return lublu.tags.save(tag).then(() => {
+				return lublu.tags.count().should.eventually.be.equal(2);
 			});
 		});
 	});
