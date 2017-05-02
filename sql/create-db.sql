@@ -19,7 +19,7 @@ CREATE TABLE lublu_post (
 	date_updated TIMESTAMPTZ DEFAULT NULL
 );
 
-CREATE INDEX blog_id_idx ON lublu_post (blog_id);
+CREATE INDEX lublu_blog_id_idx ON lublu_post (blog_id);
 
 CREATE TABLE lublu_tag (
 	id SERIAL PRIMARY KEY,
@@ -30,8 +30,20 @@ CREATE TABLE lublu_tag_join (
 	id SERIAL PRIMARY KEY,
 	post_id INTEGER NOT NULL REFERENCES lublu_post(id) ON DELETE CASCADE,
 	tag_id INTEGER NOT NULL REFERENCES lublu_tag(id) ON DELETE CASCADE,
-	UNIQUE(post_id, tag_id)
+	UNIQUE (post_id, tag_id)
 );
+
+CREATE TYPE lublu_user_rights AS ENUM ('none', 'write', 'admin');
+
+CREATE TABLE lublu_rights_join (
+	id SERIAL PRIMARY KEY,
+	rights lublu_user_rights NOT NULL,
+	blog_id INTEGER NOT NULL REFERENCES lublu_blog(id) ON DELETE CASCADE,
+	user_id INTEGER NOT NULL REFERENCES lublu_user(id) ON DELETE CASCADE,
+	UNIQUE (blog_id, user_id)
+);
+
+CREATE INDEX lublu_rights_blog_user_idx ON lublu_rights_join (blog_id, user_id);
 
 CREATE OR REPLACE FUNCTION set_date_updated()	
 RETURNS TRIGGER AS $$

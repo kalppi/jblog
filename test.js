@@ -14,6 +14,7 @@ const lublu = new Lublu('psql', pool);
 describe('lublu', function() {
 	let blog = null;
 	let user = null;
+	let user2 = null;
 	let startId = 0;
 
 	const clean = () => {
@@ -31,7 +32,7 @@ describe('lublu', function() {
 			});
 
 			const p3 = new Promise((resolve, reject) => {
-				lublu.users.findByName('test-user').then(user => {
+				lublu.users.findByName(['test-user1', 'test-user2']).then(user => {
 					lublu.users.delete(user).then(resolve);
 				}, resolve);
 			});
@@ -42,13 +43,18 @@ describe('lublu', function() {
 
 	before(done => {
 		clean().then(() => {
-			blog = lublu.Blog({name: 'test-blog'});
-			lublu.blogs.save(blog).then(() => {
-				user = lublu.User({
-					name: 'test-user'
-				});
+			user = lublu.User({
+				name: 'test-user1'
+			});
 
-				lublu.users.save(user).then(() => {
+			user2 = lublu.User({
+				name: 'test-user2'
+			});
+
+			lublu.users.save([user, user2]).then(() => {
+				lublu.blogs.create('test-blog', user).then(b => {
+					blog = b;
+
 					done();
 				});
 			});

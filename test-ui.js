@@ -9,17 +9,23 @@ const lublu = new Lublu('psql', pool);
 
 pool.connect();
 
-var app = express();
+const app = express();
 
 const invert  = p  => new Promise((res, rej) => p.then(rej, res));
 const firstOf = ps => invert(Promise.all(ps.map(invert)));
 
 firstOf([
-	lublu.blogs.findByName('test-blog'),
-	lublu.blogs.create('test-blog')
-]).then(blog => {
-	blog.ui(app);
+	lublu.users.findByName('test-user'),
+	lublu.users.create('test-user')
+]).then(user => {
+	firstOf([
+		lublu.blogs.findByName('test-blog'),
+		lublu.blogs.create('test-blog')
+	]).then(blog => {
+		blog.ui(app);
+	});
 });
+
 
 let port = 1234;
 

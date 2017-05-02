@@ -24,6 +24,7 @@ require('./lib/post')(lublu);
 require('./lib/tag')(lublu);
 require('./lib/page')(lublu);
 require('./lib/user')(lublu);
+require('./lib/rights')(lublu);
 
 
 module.exports = class Lublu {
