@@ -19,7 +19,6 @@ const lublu = {
 };
 
 require('./lib/dao/daofactory')(lublu);
-require('./lib/connection')(lublu);
 require('./lib/blog')(lublu);
 require('./lib/post')(lublu);
 require('./lib/tag')(lublu);
@@ -28,8 +27,8 @@ require('./lib/user')(lublu);
 
 
 module.exports = class Lublu {
-	constructor(db) {
-		this.daoFactory = new lublu.DaoFactory('psql', new lublu.Connection(db));
+	constructor(type, ...args) {
+		this.daoFactory = new lublu.DaoFactory(type, args);
 		
 		this.blogDAO = this.daoFactory.create('blog', this.daoFactory);
 		this.userDAO = this.daoFactory.create('user');

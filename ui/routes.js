@@ -7,8 +7,12 @@ const router = express.Router();
 
 let layout = null;
 
-fs.readFile('ui/layout.hb', function(err, content) {
-	layout = Handlebars.compile(content.toString());
+fs.readFile('ui/views/layouts/layout.hb', function(err, content) {
+	if(err) {
+		console.log(err);
+	} else {
+		layout = Handlebars.compile(content.toString());
+	}
 });
 
 function auth() {

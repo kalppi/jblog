@@ -11,11 +11,13 @@ sass.render({
 	file: 'ui/style.scss',
 }, function(err, result) {
 	fs.writeFile('ui/public/css/style.css', result.css, (err) => {
-
+		if(err) {
+			console.log(err);
+		}
 	});
 });
 
-module.exports = function(app) {
+module.exports = function(app, lublu, blog) {
 	app.use('/css', express.static('ui/public/css'));
 	app.use('/admin', routes);
 }

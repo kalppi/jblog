@@ -1,17 +1,25 @@
 'use strict';
 
-const lublu = require('./index.js');
+const Lublu = require('./index.js');
 const express = require('express');
 const pg = require('pg');
 
 const pool = new pg.Pool(require('./test-db.json'));
-const blog = new lublu(pool);
+const lublu = new Lublu('psql', pool);
 
 pool.connect();
 
 var app = express();
 
-blog.ui(app);
+const invert  = p  => new Promise((res, rej) => p.then(rej, res));
+const firstOf = ps => invert(Promise.all(ps.map(invert)));
+
+firstOf([
+	lublu.blogs.findByName('test-blog'),
+	lublu.blogs.create('test-blog')
+]).then(blog => {
+	blog.ui(app);
+});
 
 let port = 1234;
 

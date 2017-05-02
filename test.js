@@ -9,7 +9,7 @@ chai.should();
 const pg = require('pg');
 const pool = new pg.Pool(require('./test-db.json'));
 const Lublu = require('./index.js');
-const lublu = new Lublu(pool);
+const lublu = new Lublu('psql', pool);
 
 describe('lublu', function() {
 	let blog = null;
