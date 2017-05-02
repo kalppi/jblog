@@ -27,7 +27,7 @@ require('./lib/page')(lublu);
 require('./lib/user')(lublu);
 
 
-module.exports = class {
+module.exports = class Lublu {
 	constructor(db) {
 		this.daoFactory = new lublu.DaoFactory('psql', new lublu.Connection(db));
 		
