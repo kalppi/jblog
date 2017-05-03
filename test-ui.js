@@ -20,11 +20,11 @@ firstOf([
 ]).then(user => {
 	firstOf([
 		lublu.blogs.findByName('test-blog'),
-		lublu.blogs.create('test-blog')
+		lublu.blogs.create('test-blog', user)
 	]).then(blog => {
 		blog.ui(app);
-	});
-});
+	}, console.log);
+}, console.log);
 
 
 let port = 1234;

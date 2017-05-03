@@ -18,20 +18,16 @@ const lublu = {
 	}
 };
 
-require('./lib/dao/daofactory')(lublu);
-require('./lib/blog')(lublu);
-require('./lib/post')(lublu);
-require('./lib/tag')(lublu);
-require('./lib/page')(lublu);
-require('./lib/user')(lublu);
-require('./lib/rights')(lublu);
+const DaoFactory = require('./lib/dao/daofactory')(lublu),
+	DataObject = require('./lib/dataobject')(lublu),
+	Page = require('./lib/page')(lublu);
 
 
 module.exports = class Lublu {
 	constructor(type, ...args) {
-		this.daoFactory = new lublu.DaoFactory(type, args);
+		this.daoFactory = new DaoFactory(type, args);
 		
-		this.blogDAO = this.daoFactory.create('blog', this.daoFactory);
+		this.blogDAO = this.daoFactory.create('blog');
 		this.userDAO = this.daoFactory.create('user');
 		this.tagDAO = this.daoFactory.create('tag');
 	}
@@ -49,18 +45,18 @@ module.exports = class Lublu {
 	}
 
 	Blog(data) {
-		return new lublu.Blog(data, this.daoFactory);
+		return new Blog(data, this.daoFactory);
 	}
 
 	Post(data) {
 		if(Array.isArray(data)) {
 			let posts = [];
 			for(let d of data) {
-				posts.push(new lublu.Post(d));
+				posts.push(DataObject.factory('post', d));
 			}
 			return posts;
 		} else {
-			return new lublu.Post(data);
+			return DataObject.factory('post', data);
 		}
 	}
 
@@ -68,19 +64,19 @@ module.exports = class Lublu {
 		if(Array.isArray(data)) {
 			let posts = [];
 			for(let d of data) {
-				posts.push(new lublu.User(d));
+				posts.push(DataObject.factory('user', d));
 			}
 			return posts;
 		} else {
-			return new lublu.User(data);
+			return DataObject.factory('user', data);
 		}
 	}
 
 	Tag(data) {
-		return new lublu.Tag(data);
+		return DataObject.factory('tag', data);
 	}
 
 	Page(dao, options) {
-		return new lublu.Page(dao, options);
+		return new Page(dao, options);
 	}
 }

@@ -33,7 +33,7 @@ CREATE TABLE lublu_tag_join (
 	UNIQUE (post_id, tag_id)
 );
 
-CREATE TYPE lublu_user_rights AS ENUM ('none', 'write', 'admin');
+CREATE TYPE lublu_user_rights AS ENUM ('none', 'write', 'owner');
 
 CREATE TABLE lublu_rights_join (
 	id SERIAL PRIMARY KEY,

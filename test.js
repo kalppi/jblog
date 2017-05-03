@@ -37,7 +37,7 @@ describe('lublu', function() {
 				}, resolve);
 			});
 
-			Promise.all([p1, p2, p3]).then(resolve);
+			Promise.all([p1, p2, p3]).then(resolve, console.log);
 		});
 	};
 
@@ -56,15 +56,15 @@ describe('lublu', function() {
 					blog = b;
 
 					done();
-				});
-			});
-		});
+				}, console.log);
+			}, console.log);
+		}, console.log);
 	});
 
 	after(done => {
 		clean().then(() => {
 			done();
-		});
+		}, console.log		);
 	});
 
 	beforeEach((done) => {
@@ -92,10 +92,16 @@ describe('lublu', function() {
 			blog.posts.save(posts).then(() => {
 				startId = posts[0].get('id');
 
-				done();
-			}).catch(err => {
-				console.log(err);
-			});
+				blog.denyRights(user, user2).then(() => {
+					done();
+				}, console.log);
+			}, console.log);
+		}, console.log);
+	});
+
+	describe('Blog', function() {
+		it('Get owner', function() {
+			
 		});
 	});
 
@@ -276,6 +282,60 @@ describe('lublu', function() {
 			return lublu.tags.save(tag).then(() => {
 				return lublu.tags.count().should.eventually.be.equal(2);
 			});
+		});
+	});
+
+	describe('Rights', function() {
+		it('Don\'t allow to save post without necessary rights', function() {
+			let post = lublu.Post({
+				title: 'title1',
+				content: 'content1',
+				user: user2
+			});
+
+			return blog.posts.save(post).should.be.rejectedWith(Error);
+		});
+
+		it('Don\'t allow granting rights to post if not owner', function() {
+			return blog.grantRights(user2, user2, 'write').should.be.rejectedWith(Error);
+		});
+
+		it('Allow granting rights to post if owner', function() {
+			let post = lublu.Post({
+				title: 'title1',
+				content: 'content1',
+				user: user2
+			});
+
+			return blog.grantRights(user, user2, 'write').then(() => {
+				return blog.posts.save(post).should.not.be.rejected;
+			});
+		});
+
+		it('Don\'t allow granting owner', function() {
+			return blog.grantRights(user, user2, 'owner').should.be.rejected;
+		});
+
+		it('Allow denying write rights', function() {
+			let post = lublu.Post({
+				title: 'title1',
+				content: 'content1',
+				user: user2
+			});
+
+			return blog.grantRights(user, user2, 'write').then(() => {
+				return blog.denyRights(user, user2).then(() => {
+					return blog.posts.save(post).should.be.rejectedWith(Error);
+				});
+			});
+		});
+
+		it('Don\'t allow denying owner rights', function() {
+			return blog.denyRights(user, user).should.be.rejectedWith(Error);
+		});
+
+		it('Allow changing owners', function() {
+			
 		});
 	});
 });
