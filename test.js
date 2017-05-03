@@ -101,7 +101,9 @@ describe('lublu', function() {
 
 	describe('Blog', function() {
 		it('Get owner', function() {
-			
+			return lublu.blogs.getOwner(blog).then(owner => {
+				owner.get('id').should.equal(user.get('id'));
+			});
 		});
 	});
 
