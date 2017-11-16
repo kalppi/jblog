@@ -6,8 +6,10 @@ chai.use(require('chai-things'));
 chai.use(require("chai-as-promised"));
 chai.should();
 
+const config = require('./test-db.json');
+
 const pg = require('pg');
-const pool = new pg.Pool(require('./test-db.json'));
+const pool = new pg.Pool(config);
 const Lublu = require('./index.js');
 const lublu = new Lublu('psql', pool);
 
@@ -64,7 +66,7 @@ describe('lublu', function() {
 	after(done => {
 		clean().then(() => {
 			done();
-		}, console.log		);
+		}, console.log);
 	});
 
 	beforeEach((done) => {
@@ -210,6 +212,10 @@ describe('lublu', function() {
 			});
 		});
 
+		it('#create() do not allow same name twice', function() {
+			return lublu.blogs.create('test-blog', user).should.be.rejectedWith('duplicate key');
+		});
+
 		it('#delete()', function() {
 			return blog.posts.count().then(count => {
 				return blog.posts.findRandom().then((post) => {
@@ -337,7 +343,11 @@ describe('lublu', function() {
 		});
 
 		it('Allow changing owners', function() {
-			
+			return lublu.blogs.getOwner(blog).then((owner) => {
+				return lublu.blogs.changeOwner(blog, user2).then(() => {
+					return lublu.blogs.getOwner(blog).should.eventually.have.deep.property('data.name').equal("test-user2");
+				});
+			});
 		});
 	});
 });

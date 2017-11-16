@@ -1,6 +1,6 @@
 CREATE TABLE lublu_blog (
 	id SERIAL PRIMARY KEY,
-	name VARCHAR(100)
+	name CITEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE lublu_user (

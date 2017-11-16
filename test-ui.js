@@ -3,6 +3,10 @@
 const Lublu = require('./index.js');
 const express = require('express');
 const pg = require('pg');
+const fs = require('fs');
+const sass = require('node-sass');
+
+const routes = require('./ui/routes');
 
 const pool = new pg.Pool(require('./test-db.json'));
 const lublu = new Lublu('psql', pool);
@@ -10,25 +14,51 @@ const lublu = new Lublu('psql', pool);
 pool.connect();
 
 const app = express();
+const port = 1234;
 
-const invert  = p  => new Promise((res, rej) => p.then(rej, res));
-const firstOf = ps => invert(Promise.all(ps.map(invert)));
+const onlyFirst = ps => {
+	return new Promise((resolve, reject) => {
+		let p = ps.shift();
 
-firstOf([
-	lublu.users.findByName('test-user'),
-	lublu.users.create('test-user')
+		if(!p) resolve(null);
+		else p.call().then(f => resolve(f), () => resolve(onlyFirst(ps)));
+	});
+};
+
+function renderCss() {
+	return new Promise((resolve, reject) => {
+		sass.render({
+			file: 'ui/style.scss',
+		}, function(err, result) {
+			fs.writeFile('ui/public/css/style.css', result.css, (err) => {
+				if(err) {
+					console.log(err);
+				} else {
+					resolve();
+				}
+			});
+		});
+	});
+}
+
+
+onlyFirst([
+	lublu.users.findByName.bind(lublu.users, 'test-user'),
+	lublu.users.create.bind(lublu.users, 'test-user')
 ]).then(user => {
-	firstOf([
-		lublu.blogs.findByName('test-blog'),
-		lublu.blogs.create('test-blog', user)
+	onlyFirst([ 	
+		lublu.blogs.findByName.bind(lublu.blogs, 'test-blog'),
+		lublu.blogs.create.bind(lublu.blogs, 'test-blog', user)
 	]).then(blog => {
-		blog.ui(app);
+		app.listen(port);
+
+		console.log("Listening on port", port);
+
+		renderCss().then(() => {
+			app.use('/css', express.static('ui/public/css'));
+			app.use('/', routes);
+		});
 	}, console.log);
 }, console.log);
 
 
-let port = 1234;
-
-app.listen(port);
-
-console.log("Listening on port", port);
