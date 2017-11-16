@@ -19,7 +19,7 @@ function spawnServer() {
 		console.log("> " + data);
 	});
 
-	gulp.watch(['test-ui.js', 'ui/*.*'], function() {
+	gulp.watch(['test-ui.js', 'ui/private/**/*.*'], function() {
 		console.log('Server change detected, spawning new');
 
 		spawnServer();

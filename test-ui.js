@@ -6,7 +6,7 @@ const pg = require('pg');
 const fs = require('fs');
 const sass = require('node-sass');
 
-const routes = require('./ui/routes');
+const routes = require('./ui/private/routes');
 
 const pool = new pg.Pool(require('./test-db.json'));
 const lublu = new Lublu('psql', pool);
@@ -28,15 +28,19 @@ const onlyFirst = ps => {
 function renderCss() {
 	return new Promise((resolve, reject) => {
 		sass.render({
-			file: 'ui/style.scss',
+			file: 'ui/private/style.scss',
 		}, function(err, result) {
-			fs.writeFile('ui/public/css/style.css', result.css, (err) => {
-				if(err) {
-					console.log(err);
-				} else {
-					resolve();
-				}
-			});
+			if(err) {
+				reject(err);
+			} else {
+				fs.writeFile('ui/public/css/style.css', result.css, (err) => {
+					if(err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
+			}
 		});
 	});
 }
@@ -56,8 +60,8 @@ onlyFirst([
 
 		renderCss().then(() => {
 			app.use('/css', express.static('ui/public/css'));
-			app.use('/', routes);
-		});
+			app.use('/', routes(lublu));
+		}, console.log);
 	}, console.log);
 }, console.log);
 
